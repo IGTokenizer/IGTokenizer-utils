@@ -1,0 +1,8 @@
+{
+    "name": "Instagram Posts NFTs",
+    "description": "NFTs minted after successfully verifying the authority over an Instagram Post.",
+    "image": "ipfs://QmfUMnp87PJtWUMd8uPr238edLjVWTnBVg45SBSqkEeYYA",
+    "external_link": "https://faysalbadaoui.com",
+    "seller_fee_basis_points": 100,
+    "fee_recipient": "0x26E524419bbA6057911cFA41698863DFab19745C"
+}
