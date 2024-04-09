@@ -6,7 +6,7 @@ import {ConfirmedOwner} from "@chainlink/contracts@0.8.0/src/v0.8/shared/access/
 import {LinkTokenInterface} from "@chainlink/contracts@0.8.0/src/v0.8/shared/interfaces/LinkTokenInterface.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
-contract IGTokenizerConsumer is ChainlinkClient, ConfirmedOwner {
+contract IGTokenizerConsumer is ChainlinkClient {
     using Chainlink for Chainlink.Request;
     using Strings for uint96;
 
@@ -23,14 +23,15 @@ contract IGTokenizerConsumer is ChainlinkClient, ConfirmedOwner {
     }
 
     mapping(bytes32 => IGTokenization) public requests;
+    bytes32[] public requestKeys;
 
     event TokenizationRequest(bytes32 indexed requestId, string postId, string hashId);
     event InstagramPostVerification(bytes32 indexed requestId, string postId, bool isVerified);
 
-    constructor() ConfirmedOwner(msg.sender) {
+    constructor() {
         setChainlinkToken(0x779877A7B0D9E8603169DdbD7836e478b4624789);
         setChainlinkOracle(0xDE6fe1bC4Dda932e0a5b557DdB10bbe5878ee752);
-        jobId = "5bffc19f81d746abbc12b43cf3fd63a0";
+        jobId = "969b68fc36ab4cdfb2626c42d82842eb";
         fee = 0.1 * 10**18;
     }
 
@@ -44,6 +45,7 @@ contract IGTokenizerConsumer is ChainlinkClient, ConfirmedOwner {
         req.add("hashToVerify", hashVerify);
 
         requestId = sendChainlinkRequest(req, fee);
+        requestKeys.push(requestId);
         requests[requestId] = IGTokenization(postIg, msg.sender, hashVerify, true, false);
         emit TokenizationRequest(requestId, postIg, hashVerify);
         return requestId;
@@ -56,11 +58,16 @@ contract IGTokenizerConsumer is ChainlinkClient, ConfirmedOwner {
         emit InstagramPostVerification(requestId, requests[requestId].postId, valid);
     }
 
-    function withdrawLink() public onlyOwner {
-        LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
-        require(
-            link.transfer(msg.sender, link.balanceOf(address(this))),
-            "Unable to transfer"
-        );
+    function getAllTokenizationRequests() external view returns (bytes32[] memory, IGTokenization[] memory) {
+        bytes32[] memory keys = new bytes32[](requestKeys.length);
+        IGTokenization[] memory tokenizationContracts = new IGTokenization[](requestKeys.length);
+
+        for (uint256 i = 0; i < requestKeys.length; i++) {
+            bytes32 key = requestKeys[i];
+            keys[i] = key;
+            tokenizationContracts[i] = requests[key];
+        }
+
+        return (keys, tokenizationContracts);
     }
 }
