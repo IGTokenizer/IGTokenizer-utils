@@ -28,13 +28,13 @@ contract IGPostNFT is Ownable, Pausable, ERC721URIStorage, IGTokenizerConsumer {
     
     //IPFS Hash of the metadata of the Smart Contract
     function contractURI() public pure returns (string memory) {
-        return "ipfs://QmPeYkVk8qXZ8hdZLZQoRe6K2prpfrtkGbAdGAHzjw1A7U";
+        return "ipfs://QmTTr8XqyJdwVwvxGuCXhQdyLGf4vqnGvuo2amGBkrQUWX";
     }
 
     function mint(string memory postID, string memory metadataIPFS) public whenNotPaused() returns (uint256)
     {
         require(verifiedOwner[postID] == address(0) || verifiedOwner[postID] == msg.sender,
-            "The video is already verified and sender is not registered as the owner");
+            "Instagram post verified with another wallet");
         (uint96 videoTokenId, uint256 tokenId) = generateTokenId(postID);
         if (verifiedOwner[postID] == msg.sender) {
             _verifiedMint(msg.sender, postID, tokenId, metadataIPFS);
