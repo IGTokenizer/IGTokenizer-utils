@@ -9,8 +9,9 @@ import "./IGTokenizerConsumer.sol";
 contract IGPostNFT is Ownable, Pausable, ERC721URIStorage, IGTokenizerConsumer {
 
     mapping(string => address) private verifiedOwner;
-
     mapping(string => uint16) public edition;
+    mapping(bytes32 => MintedNFT) private requestedNFTs;
+    bytes32[] public requestsMadeKeys;
 
     struct MintedNFT {
         address requester;
@@ -18,8 +19,7 @@ contract IGPostNFT is Ownable, Pausable, ERC721URIStorage, IGTokenizerConsumer {
         uint256 tokenId;
         string metadataIPFS;
     }
-    mapping(bytes32 => MintedNFT) private requestedNFTs;
-    bytes32[] public requestsMadeKeys;
+
     event IGNFTMinted(address indexed minter, string postID, uint16 edition, uint256 tokenId, string tokenUri);
 
     constructor(address initialOwner) Ownable(initialOwner)
@@ -65,7 +65,7 @@ contract IGPostNFT is Ownable, Pausable, ERC721URIStorage, IGTokenizerConsumer {
     function generateTokenId(string memory postID) public view returns(uint96 videoTokenId, uint256 tokenId) {
         bytes memory postIdBytes = bytes(postID);
         require(postIdBytes.length == 11, "Instagram Post Id should be 11 ASCII characters long");
-        videoTokenId = _toUint96(abi.encodePacked(hex"00", postIdBytes), 0);
+        videoTokenId = _toUint96(abi.encodePacked(hex"00", postIdBytes), 0) + edition[postID] + 1;
         tokenId = uint256(videoTokenId) * 100000 + edition[postID] + 1;
     }
 
